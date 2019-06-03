@@ -1,0 +1,185 @@
+{
+  # Listen address for peer connections. Default is to listen for all
+  # TCP connections over IPv4 and IPv6 with a random port.
+  Listen: "{{ yggdrasil_config_listen_address }}"
+
+  # Listen address for admin connections. Default is to listen for local
+  # connections either on TCP/9001 or a UNIX socket depending on your
+  # platform. Use this value for yggdrasilctl -endpoint=X. To disable
+  # the admin socket, use the value "none" instead.
+  AdminListen: "{{ yggdrasil_admin_listen_address }}"
+
+  # List of connection strings for static peers in URI format, e.g.
+  # tcp://a.b.c.d:e or socks://a.b.c.d:e/f.g.h.i:j.
+  Peers: [
+  {% for peer in yggdrasil_extra_peers %}
+  {% if peer.listen_uri is defined %}
+  "{{ peer.listen_uri }}",
+	{% endif %}
+	{% endfor %}
+  {% for peer in yggdrasil_ansible_peers %}
+  {% if hostvars[peer] is defined %}
+  {% if hostvars[peer].yggdrasil_listen_address is defined %}
+  "{{ hostvars[peer].yggdrasil_listen_address }}",
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+  ]
+
+  # List of connection strings for static peers in URI format, arranged
+  # by source interface, e.g. { "eth0": [ tcp://a.b.c.d:e ] }. Note that
+  # SOCKS peerings will NOT be affected by this option and should go in
+  # the "Peers" section instead.
+  InterfacePeers: {
+  {% for interface in yggdrasil_interface_peer_interfaces %}
+  {{ interface.identifier }}: [
+  {% for peer in interface.peers %}
+  "{{ peer }}",
+  {% endfor %}
+  ],
+  {% endfor %}
+  }
+
+  # Read timeout for connections, specified in milliseconds. If less
+  # than 6000 and not negative, 6000 (the default) is used. If negative,
+  # reads won't time out.
+  ReadTimeout: 0
+
+  # List of peer encryption public keys to allow or incoming TCP
+  # connections from. If left empty/undefined then all connections
+  # will be allowed by default.
+  AllowedEncryptionPublicKeys: [
+  {% if yggdrasil_limit_incoming_connections %}
+  {% for peer in yggdrasil_extra_peers %}
+  {% if peer.public_key is defined %}
+  "{{ peer.public_key }}",
+  {% endif %}
+  {% endfor %}
+  {% for peer in yggdrasil_ansible_peers %}
+  {% if hostvars[peer] is defined %}
+  {% if hostvars[peer].yggdrasil_encryption_public_key is defined %}
+  "{{ hostvars[peer].yggdrasil_encryption_public_key }}",
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  ]
+
+  # Your public encryption key. Your peers may ask you for this to put
+  # into their AllowedEncryptionPublicKeys configuration.
+  EncryptionPublicKey: "{{ yggdrasil_encryption_public_key }}"
+
+  # Your private encryption key. DO NOT share this with anyone!
+  EncryptionPrivateKey: "{{ yggdrasil_encryption_private_key }}"
+
+  # Your public signing key. You should not ordinarily need to share
+  # this with anyone.
+  SigningPublicKey: "{{ yggdrasil_signing_public_key }}"
+
+  # Your private signing key. DO NOT share this with anyone!
+  SigningPrivateKey: "{{ yggdrasil_signing_private_key }}"
+
+  # Regular expressions for which interfaces multicast peer discovery
+  # should be enabled on. If none specified, multicast peer discovery is
+  # disabled. The default value is .* which uses all interfaces.
+  MulticastInterfaces:
+  [
+  {% for interface in yggdrasil_multicast_interfaces %}
+  {{ interface }}
+  {% endfor %}
+  ]
+
+  # Local network interface name for TUN/TAP adapter, or "auto" to select
+  # an interface automatically, or "none" to run without TUN/TAP.
+  IfName: auto
+
+  # Set local network interface to TAP mode rather than TUN mode if
+  # supported by your platform - option will be ignored if not.
+  IfTAPMode: false
+
+  # Maximux Transmission Unit (MTU) size for your local TUN/TAP interface.
+  # Default is the largest supported size for your platform. The lowest
+  # possible value is 1280.
+  IfMTU: 65535
+
+  # The session firewall controls who can send/receive network traffic
+  # to/from. This is useful if you want to protect this node without
+  # resorting to using a real firewall. This does not affect traffic
+  # being routed via this node to somewhere else. Rules are prioritised as
+  # follows: blacklist, whitelist, always allow outgoing, direct, remote.
+  SessionFirewall:
+  {
+    # Enable or disable the session firewall. If disabled, network traffic
+    # from any node will be allowed. If enabled, the below rules apply.
+    Enable: false
+
+    # Allow network traffic from directly connected peers.
+    AllowFromDirect: true
+
+    # Allow network traffic from remote nodes on the network that you are
+    # not directly peered with.
+    AllowFromRemote: true
+
+    # Allow outbound network traffic regardless of AllowFromDirect or
+    # AllowFromRemote. This does allow a remote node to send unsolicited
+    # traffic back to you for the length of the session.
+    AlwaysAllowOutbound: false
+
+    # List of public keys from which network traffic is always accepted,
+    # regardless of AllowFromDirect or AllowFromRemote.
+    WhitelistEncryptionPublicKeys: []
+
+    # List of public keys from which network traffic is always rejected,
+    # regardless of the whitelist, AllowFromDirect or AllowFromRemote.
+    BlacklistEncryptionPublicKeys: []
+  }
+
+  # Allow tunneling non-Yggdrasil traffic over Yggdrasil. This effectively
+  # allows you to use Yggdrasil to route to, or to bridge other networks,
+  # similar to a VPN tunnel. Tunnelling works between any two nodes and
+  # does not require them to be directly peered.
+  TunnelRouting:
+  {
+    # Enable or disable tunnel routing.
+    Enable: false
+
+    # IPv6 CIDR subnets, mapped to the EncryptionPublicKey to which they
+    # should be routed, e.g. { "aaaa:bbbb:cccc::/e": "boxpubkey", ... }
+    IPv6Destinations: {}
+
+    # Optional IPv6 source subnets which are allowed to be tunnelled in
+    # addition to this node's Yggdrasil address/subnet. If not
+    # specified, only traffic originating from this node's Yggdrasil
+    # address or subnet will be tunnelled.
+    IPv6Sources: []
+
+    # IPv4 CIDR subnets, mapped to the EncryptionPublicKey to which they
+    # should be routed, e.g. { "a.b.c.d/e": "boxpubkey", ... }
+    IPv4Destinations: {}
+
+    # IPv4 source subnets which are allowed to be tunnelled. Unlike for
+    # IPv6, this option is required for bridging IPv4 traffic. Only
+    # traffic with a source matching these subnets will be tunnelled.
+    IPv4Sources: []
+  }
+
+  # Advanced options for tuning the switch. Normally you will not need
+  # to edit these options.
+  SwitchOptions:
+  {
+    # Maximum size of all switch queues combined (in bytes).
+    MaxTotalQueueSize: 4194304
+  }
+
+  # By default, nodeinfo contains some defaults including the platform,
+  # architecture and Yggdrasil version. These can help when surveying
+  # the network and diagnosing network routing problems. Enabling
+  # nodeinfo privacy prevents this, so that only items specified in
+  # "NodeInfo" are sent back if specified.
+  NodeInfoPrivacy: {{ yggdrasil_node_info_privacy | tojson }}
+
+  # Optional node info. This must be a { "key": "value", ... } map
+  # or set as null. This is entirely optional but, if set, is visible
+  # to the whole network on request.
+  NodeInfo: {{ yggdrasil_node_info | tojson }}
+}

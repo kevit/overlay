@@ -1,0 +1,23 @@
+---
+- name: add rpm key
+  rpm_key:
+    key: http://pool.sks-keyservers.net/pks/lookup?op=get&search=0x5898470A764B32C9
+  register: task_result
+  until: task_result is success
+  retries: 3
+  delay: 2
+
+- name: add yum repo
+  copy:
+    src: fedora/yggdrasil.repo
+    dest: /etc/yum.repos.d/yggdrasil.repo
+    owner: root
+    group: root
+
+- name: install yggdrasil
+  dnf:
+    name: yggdrasil
+  register: task_result
+  until: task_result is success
+  retries: 3
+  delay: 2

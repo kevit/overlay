@@ -1,0 +1,32 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: stop systemd resolver service
+      service: 
+        name: systemd-resolved
+        state: stopped
+    - name: disable systemd-resolver service and ensure it is masked
+      systemd:
+        name: systemd-resolved
+        enabled: no
+        masked: yes
+#    - name: Remove resolv.conf symlink
+#      file:
+#       path: "/etc/resolv.conf"
+#       state: absent
+#
+    - name: Checking pdns package in apt
+      apt: 
+        name: pdns-recursor 
+        update_cache: yes 
+        cache_valid_time: 3600 
+        state: present
+    - name: Generating main powerdns config files
+      template: 
+        src: recursor.conf.j2 
+        dest: /etc/powerdns/recursor.conf
+    - name: restart pdns-recursor
+      service: 
+        name: pdns-recursor 
+        state: restarted

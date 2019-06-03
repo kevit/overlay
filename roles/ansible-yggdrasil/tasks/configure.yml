@@ -1,0 +1,3 @@
+---
+- import_tasks: configure/configuration.yml
+- import_tasks: configure/service.yml

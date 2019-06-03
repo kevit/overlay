@@ -1,0 +1,9 @@
+- name: Deploy firewall
+  hosts: all
+  tasks:
+    - name: Install and configure firewall
+      include_role:
+        name: geerlingguy.firewall
+      vars:
+        firewall_allowed_tcp_ports:
+          - "22"

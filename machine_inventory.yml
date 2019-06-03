@@ -1,0 +1,14 @@
+---
+all:
+  hosts:
+    overlay:
+      hostname: 192.168.44.50.xip.io
+      ansible_port: 22
+      ansible_host: 192.168.44.50
+      ansible_user: vagrant
+      ansible_ssh_private_key_file: .vagrant/machines/overlay/libvirt/private_key
+      box: generic/ubuntu1604
+      ram: 1024
+      cpus: 1
+      playbook: deploy.yml
+      ansible_python_interpreter: /usr/bin/python3

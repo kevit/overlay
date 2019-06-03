@@ -1,0 +1,8 @@
+[Interface]
+PrivateKey = {{ client_private.stdout }}
+ListenPort =  {{ wireguard_port }}
+Address = {{client_ip}}
+[Peer]
+PublicKey = {{ public_key }}
+Endpoint = {{vpn_hostname}}:{{ wireguard_port }}
+AllowedIPs = 10.11.12.0/24

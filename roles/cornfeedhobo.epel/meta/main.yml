@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: "epel"
+  author: "cornfeedhobo"
+  description: "Install the EPEL repository. Useful as a dependency for other roles."
+  license: "MIT"
+  min_ansible_version: 1.2
+  platforms:
+    - name: "EL"
+      versions:
+        - 7
+        - 6
+  galaxy_tags:
+    - "epel"
+
+dependencies: []

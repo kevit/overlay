@@ -1,0 +1,20 @@
+---
+sudo: required
+language: python
+services:
+  - docker
+env:
+
+install:
+  - pip install molecule
+  - pip install docker
+
+branches:
+  only:
+    - master
+
+script:
+  - molecule test
+
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

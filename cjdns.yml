@@ -1,0 +1,6 @@
+- hosts: all
+  tasks:
+    - name: Install cjdns
+      include_role:
+        name: cornfeedhobo.cjdns
+

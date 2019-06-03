@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    centos_base_enable_epel: true
+    centos_base_install_selinux_packages: true
+    centos_base_basic_packages: true
+    centos_base_security_packages: true
+    dkim_admin_email: admin@example.com
+    dkim_selector: default
+    dkim_domains:
+      - example.com
+      - example.org
+  roles:
+    - role: bngsudheer.centos_base
+    - role: ansible-role-dkim

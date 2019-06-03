@@ -1,0 +1,8 @@
+auto wireguard
+iface wireguard inet static
+        address {{ wireguard_ip }}
+        netmask 255.255.255.255
+        pre-up ip link add wireguard type wireguard
+        pre-up wg setconf wireguard /etc/wireguard/wireguard.conf
+#        post-up ip -6 addr add $laddr6 peer $paddr6 dev $interface
+	    post-down ip link del wireguard

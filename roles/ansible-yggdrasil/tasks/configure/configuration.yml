@@ -1,0 +1,6 @@
+---
+- name: template configuration
+  template:
+    src: yggdrasil.conf.j2
+    dest: "{{ yggdrasil_config_path }}"
+  notify: restart yggdrasil

@@ -1,0 +1,16 @@
+---
+- name: start yggdrasil
+  service:
+    name: yggdrasil
+    enabled: true
+    state: started
+  when: ansible_lsb.id != "Void"
+
+# This separate entry here is needed because
+# the service module does not support runit
+- name: start yggdrasil
+  runit:
+    name: yggdrasil
+    enabled: true
+    state: started
+  when: ansible_lsb.id == "Void"

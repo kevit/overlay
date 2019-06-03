@@ -1,0 +1,13 @@
+---
+- import_playbook: wireguard.yml
+- import_playbook: glider.yml
+- import_playbook: pdns_recursor.yml
+- import_playbook: i2pd.yml
+- import_playbook: firewall.yml
+- import_playbook: cjdns.yml
+#- import_playbook: repos.yml
+#- import_playbook: network_setup.yml
+- import_playbook: yggdrasil.yml
+#temporary disabled
+#- import_playbook: openvpn.yml
+#- import_playbook: bird.yml

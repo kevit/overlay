@@ -1,0 +1,33 @@
+- name: Deploy service
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Setup ntp package
+      apt: name=ntp state=present
+
+    - name: Enable ntpd service 
+      service: name=ntp state=started enabled=yes
+
+    - name: Enable Ubuntu PPA
+      apt_repository: repo='ppa:purplei2p/i2pd'
+
+    - name: Setup i2pd package
+      apt: name=i2pd state=present
+
+    - name: Enable i2pd service
+      service: name=i2pd state=started enabled=yes
+
+    - name: Reload i2pd
+      service: name=i2pd state=reloaded
+
+    - name: Grep b32 from logs
+      shell: sleep 2s && grep "New private keys file" /var/log/i2pd/i2pd.log | grep -Eo "([a-z0-9]+).b32.i2p" | tail -n1
+      register: b32_dest
+      ignore_errors: True
+      changed_when: False
+
+    - name: Print b32 destination
+      shell: "echo '{{ service }} {{ b32_dest.stdout }}' >> /tmp/i2pd_services.txt"
+      ignore_errors: True
+      changed_when: False

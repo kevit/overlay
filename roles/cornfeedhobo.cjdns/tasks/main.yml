@@ -1,0 +1,54 @@
+---
+
+- name: "Include OS-specific variables"
+  include_vars: "{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+  tags: ["cjdns", "cjdns-install", "cjdns-configure", "cjdns-service"]
+
+- name: "Adding PPA"
+  apt_repository:
+    repo: 'ppa:cjdns-ppa/ppa'
+  when: ansible_os_family == 'Debian'
+
+- name: "Ensure cjdns is installed"
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: "{{ cjdns_package_state }}"
+  tags: ["cjdns", "cjdns-install"]
+  with_items: "{{ cjdns_packages | list }}"
+
+
+- name: "Configure cjdns"
+  become: true
+  template:
+    src: "cjdroute.conf.j2"
+    dest: "/etc/cjdroute.conf"
+    backup: "yes"
+    owner: "{{ cjdns_user }}"
+    group: "{{ cjdns_group }}"
+    mode: "0640"
+  tags: ["cjdns", "cjdns-configure"]
+  notify: ["restart cjdns"]
+
+
+- name: "Ensure modified systemd service file is installed"
+  become: true
+  template:
+    src: "cjdns.service.j2"
+    dest: "/etc/systemd/system/cjdns.service"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  register: "_cjdns_service_file"
+  tags: ["cjdns", "cjdns-service"]
+  notify: ["restart cjdns"]
+
+
+- name: "Manage cjdns service"
+  become: true
+  service:
+    name: "{{ cjdns_service_name }}"
+    state: "{{ cjdns_service_state }}"
+    enabled: "{{ cjdns_service_enabled }}"
+    daemon_reload: "{{ _cjdns_service_file.changed | ternary('yes', 'no') }}"
+  tags: ["cjdns", "cjdns-service"]

@@ -1,0 +1,93 @@
+---
+- name: Install Opendkim packages
+  yum:
+    name:
+      - opendkim
+      - opendkim-tools
+      - openssl
+    state: present
+
+- name: Add postfix user to opendkim group
+  user:
+    name: opendkim
+    groups: postfix
+    append: yes
+
+- name: Opendkim directory
+  file:
+    path: /etc/opendkim
+    state: directory
+
+- name: Opendkim keys directory
+  file:
+    path: /etc/opendkim/keys
+    owner: opendkim
+    group: opendkim
+    mode: "u=rwx,g=,o="
+    state: directory
+
+- name: Opendkim keys directory
+  file:
+    path: "/etc/opendkim/keys/{{ item }}"
+    owner: opendkim
+    group: opendkim
+    mode: "u=rwx,g=,o="
+    state: directory
+  loop: "{{ dkim_domains }}"
+
+- name: Opendkim default configuration
+  copy:
+    src: etc/default/opendkim
+    dest: /etc/default/opendkim
+  notify:
+    - restart opendkim
+
+- name: Opendkim TrustedHosts configuration
+  template:
+    src: etc/opendkim/TrustedHosts.j2
+    dest: /etc/opendkim/TrustedHosts
+  notify:
+    - restart opendkim
+
+- name: Opendkim configuration
+  template:
+    src: etc/opendkim.conf.j2
+    dest: /etc/opendkim.conf
+  notify:
+    - restart opendkim
+
+- name: Opendkim KeyTable configuration
+  template:
+    src: etc/opendkim/KeyTable.j2
+    dest: /etc/opendkim/KeyTable
+  notify:
+    - restart opendkim
+
+- name: Opendkim SigningTable configuration
+  template:
+    src: etc/opendkim/SigningTable.j2
+    dest: /etc/opendkim/SigningTable
+  notify:
+    - restart opendkim
+
+- name: Generate signing key
+  command: /usr/bin/opendkim-genkey -s {{ dkim_selector }} -d {{ item }} -D "/etc/opendkim/keys/{{ item }}"
+  args:
+    creates: "/etc/opendkim/keys/{{ item }}/{{ dkim_selector }}.private"
+    warn: false
+  loop: "{{ dkim_domains }}"
+  notify:
+    - restart opendkim
+
+- name: Opendkim signing key file ownership
+  file:
+    path: "/etc/opendkim/keys/{{ item }}/{{ dkim_selector }}.private"
+    owner: opendkim
+    group: opendkim
+  loop: "{{ dkim_domains }}"
+
+- name: Start and enable Opendkim
+  systemd:
+    name: opendkim
+    state: started
+    enabled: true

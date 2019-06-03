@@ -1,0 +1,14 @@
+- src: https://github.com/jtyr/ansible-config_encoder_filters.git
+  name: config_encoder_filters
+- src: https://github.com/fizista/ansible-role-dkim 
+  name: bngsudheer.opendkim
+- src: https://github.com/Stouts/Stouts.openvpn
+  name: stouts.openvpn
+- src: git+https://gitlab.com/jcgruenhage/ansible-yggdrasil
+  name: ansible-yggdrasil
+- src: debops.reprepro
+- src: debops.secret
+- src: fubarhouse.golang
+- src: git+https://github.com/kevit/ansible-role-cjdns
+  name: cornfeedhobo.cjdns
+- src: geerlingguy.firewall

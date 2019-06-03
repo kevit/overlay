@@ -1,0 +1,28 @@
+---
+
+cjdns_install: false
+cjdns_package_state: "present"
+cjdns_packages: "{{ __cjdns_packages }}"
+
+cjdns_configure: false
+cjdns_user: "{{ __cjdns_user }}"
+cjdns_group: "{{ __cjdns_group }}"
+
+cjdns_service: false
+cjdns_service_name: "{{ __cjdns_service_name }}"
+cjdns_service_state: "started"
+cjdns_service_enabled: true
+
+cjdns_private_key: ""
+cjdns_public_key: ""
+cjdns_ipv6: ""
+cjdns_tun_device: "tun99"
+
+cjdns_admin_address: "127.0.0.1"
+cjdns_admin_port: "11234"
+cjdns_admin_password: ""
+
+cjdns_udp_address: "{{ ansible_default_ipv4['address'] }}"
+cjdns_udp_port: "43211"
+cjdns_udp_connections: {}
+cjdns_authorized_passwords: []

@@ -1,0 +1,25 @@
+#wireshark
+vpn_hostname: vpn.bbs.exposed
+wireguard_ip: 100.100.100.100
+wireguard_port: 1500
+client_ip: 10.11.12.13
+#cjdns
+cjdns_private_key: "cjdns"
+cjdns_public_key: "cjdns"
+cjdns_admin_password: "adminpass"
+#peers https://github.com/hyperboria/peers/blob/master/eu
+cjdns_udp_connections:
+  "146.185.162.175:46398":
+    password: "meshwithme"
+    publicKey: "g2xyf69w70q4q2nzfyhs5ybdhpgx0uz56zxqlj27g2ytnklqvxv0.k"
+cjdns_authorized_passwords:
+  - login: ""
+    password: "adminpass"
+#yggdrasil GENERATE YOUR KEYS
+yggdrasil_encryption_public_key: e1010ea8a7ee002bb27c04063ec28b78f2a316bc2fd7c77c81af8a72a9bb9f03
+yggdrasil_signing_public_key: a58acef53433bbf5a20b839356521cd23eba0632d30ab76d3bd4bcdfc0088649
+yggdrasil_encryption_private_key: 3ca491fdfc7bfee37908159d65a8c02df39c629b894472b0d24e7ada9ef1a545
+yggdrasil_signing_private_key: 9bcf50876b79cce386f3ff67488e42383cb94b104cdbe8ee9679e4ddf705c1f0a58acef53433bbf5a20b839356521cd23eba0632d30ab76d3bd4bcdfc0088649
+yggdrasil_extra_peers:
+  - listen_uri: "146.185.176.36:12345"
+  - listen_uri:  "85.17.15.221:35239"

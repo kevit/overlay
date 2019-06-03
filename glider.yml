@@ -1,0 +1,48 @@
+- name: Deploy glider
+  hosts: all
+  tasks:
+    - name: Ensure apt cache is there
+      apt:
+        update_cache: yes
+    - name: Install glider
+      include_role:
+        name: fubarhouse.golang
+      vars:
+        go_get:
+        - name: glider
+          url: github.com/nadoo/glider
+    - name: Copy a glider binary to the proper place 
+      copy:
+        src: /root/go/bin/glider
+        dest: /usr/local/bin/glider
+        remote_src: yes
+        mode: a+rx
+    - name: Generating glider systemd config files
+      template: 
+         src: glider.service.j2 
+         dest: /etc/systemd/system/glider.service
+    - name: Create config directory
+      file:
+        path: /etc/glider/rules.d
+        state: directory
+        recurse: true
+    - name: Generating main glider config files
+      template: 
+         src: glider.conf.j2 
+         dest: /etc/glider/glider.conf
+    - name: Generating services config files
+      template: 
+         src: glider.{{ item }}.rule.j2 
+         dest: /etc/glider/rules.d/{{ item }}.rule
+      loop:
+        - i2p
+    - name: enable service and ensure it is not masked
+      systemd:
+        name: glider
+        enabled: yes
+        masked: no
+    - name: restart service
+      service: 
+        name: glider 
+        state: restarted
+

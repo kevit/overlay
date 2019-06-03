@@ -1,0 +1,74 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Add an apt key by id from a keyserver
+      shell: 'wget -q "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xE1B39B6EF6DDB96564797591AE33835F504A1A25" -O- | gpg --dearmor > /etc/apt/trusted.gpg.d/wireguard.gpg'
+
+    - name: Add ppa Wireguard
+      apt_repository:
+        repo: 'deb http://ppa.launchpad.net/wireguard/wireguard/ubuntu xenial main'
+    - name: Install Wireguard
+      apt: 
+        name: wireguard-dkms 
+        update_cache: yes 
+        state: present
+    - name: Install Wireguard
+      package: 
+        name: "{{ item }}"
+        state: present
+      loop:
+        - wireguard-tools 
+        - qrencode
+
+    - name: Generate private keys
+      shell: wg genkey
+      register: wireguard_genkey
+
+    - name: Generate private client keys
+      shell: wg genkey
+      register: client_private
+
+    - name: Generate public keys
+      shell: "echo {{ client_private.stdout }} | wg pubkey"
+      register: client_public
+
+    - set_fact:
+        private_key: "{{ wireguard_genkey.stdout }}"
+
+    - name: Generate public keys
+      shell: "echo {{ private_key }} | wg pubkey"
+      register: wireguard_pubkey
+
+    - set_fact:
+        public_key: "{{ wireguard_pubkey.stdout }}"
+
+
+    - name: Configure wireguard
+      template: 
+        src: wireguard.conf.j2 
+        dest: /etc/wireguard/wireguard.conf     
+      loop: 
+    - name: Configure client config
+      template: 
+        src: client.conf.j2 
+        dest: /opt/client.conf     
+    - name: Configure interfaces
+      template: 
+        src: wireguard_interface.j2 
+        dest: /etc/network/interfaces.d/wireguard
+
+    - name: run my script!
+      command: qrencode -t ansiutf8 < /opt/client.conf
+      register: qrcode
+    - pause:
+        prompt: "{{ qrcode.stdout }}"
+    - name: run my script!
+      command: "qrencode -s 10 -m 10 -t png < /opt/client.conf -o /opt/code.png"
+    - fetch: 
+        src: /opt/code.png
+        dest: code.png
+        flat: yes
+#    - name: Running 
+#create qrcode
