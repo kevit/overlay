@@ -1,5 +1,27 @@
 - hosts: all
   tasks:
+    - name: Generate Signature key
+      openssl_privatekey:
+        path: /etc/ssl/private/yggdrasil_sign.pem
+        type: Ed25519
+    - name: Generate Signature public key
+      openssl_publickey:
+        path: /etc/ssl/public/yggdrasil_sign.pem
+        privatekey_path: /etc/ssl/private/yggdrasil_sign.pem
+    - name: Generate Encryption key
+      openssl_privatekey:
+        path: /etc/ssl/private/yggdrasil_enc.pem
+        type: X25519
+    - name: Generate Encryption public key
+      openssl_publickey:
+        path: /etc/ssl/public/yggdrasil_enc.pem
+        privatekey_path: /etc/ssl/private/yggdrasil_enc.pem
+#openssl genpkey -algorithm x25519 -out x25519-priv.pem
+#openssl pkey -in x25519-priv.pem -pubout -out x25519-pub.pem
+#openssl genpkey -algorithm Ed25519 -out ed25519key.pem
+#openssl pkey -in ed25519key.pem -pubout -out ed25519-pub.pem
+
     - name: Install yggdrasil
       include_role:
         name: ansible-yggdrasil
+

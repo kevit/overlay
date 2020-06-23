@@ -1,0 +1,31 @@
+- name: Configure linux host
+  hosts: all
+  tasks:
+    - name: Disable rp_filter
+      sysctl:
+              name: net.ipv4.conf.all.rp_filter
+              value: '0'
+              sysctl_set: yes
+              state: present
+              reload: yes
+    - name: Disable default rp_filter
+      sysctl:
+              name: net.ipv4.conf.default.rp_filter
+              value: '0'
+              sysctl_set: yes
+              state: present
+              reload: yes
+    - name: enable ipv4 forwarding
+      sysctl:
+              name: net.ipv4.conf.all.forwarding
+              value: '1'
+              sysctl_set: yes
+              state: present
+              reload: yes
+    - name: enable ipv6 forwarding
+      sysctl:
+              name: net.ipv6.conf.all.forwarding
+              value: '1'
+              sysctl_set: yes
+              state: present
+              reload: yes
