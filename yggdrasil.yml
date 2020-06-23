@@ -4,18 +4,42 @@
       openssl_privatekey:
         path: /etc/ssl/private/yggdrasil_sign.pem
         type: Ed25519
+        select_crypto_backend: cryptography
+    - name: Load signature key
+      slurp:
+        src: /etc/ssl/private/yggdrasil_sign.pem
+      register: ygg_slurp_sign_private
     - name: Generate Signature public key
       openssl_publickey:
         path: /etc/ssl/public/yggdrasil_sign.pem
         privatekey_path: /etc/ssl/private/yggdrasil_sign.pem
+    - name: Load signature public key
+      slurp:
+        src: /etc/ssl/public/yggdrasil_sign.pem
+      register: ygg_slurp_sign_public
     - name: Generate Encryption key
       openssl_privatekey:
         path: /etc/ssl/private/yggdrasil_enc.pem
         type: X25519
+    - name: Load encryption key
+      slurp:
+        src: /etc/ssl/private/yggdrasil_enc.pem
+      register: ygg_slurp_enc_private
     - name: Generate Encryption public key
       openssl_publickey:
         path: /etc/ssl/public/yggdrasil_enc.pem
         privatekey_path: /etc/ssl/private/yggdrasil_enc.pem
+    - name: Load encryption public key
+      slurp:
+        src: /etc/ssl/public/yggdrasil_enc.pem
+      register: ygg_slurp_enc_public
+    - name: set Wireshark variables
+      set_fact: 
+        yggdrasil_encryption_public_key: "{{ ygg_slurp_sign_public.content }}" 
+        yggdrasil_encryption_private_key: "{{ ygg_slurp_sign_private.content }}" 
+        yggdrasil_signing_public_key: "{{ ygg_slurp_enc_public.content }}" 
+        yggdrasil_signing_private_key: "{{ ygg_slurp_enc_private.content }}" 
+ 
 #openssl genpkey -algorithm x25519 -out x25519-priv.pem
 #openssl pkey -in x25519-priv.pem -pubout -out x25519-pub.pem
 #openssl genpkey -algorithm Ed25519 -out ed25519key.pem

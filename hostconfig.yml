@@ -1,6 +1,13 @@
 - name: Configure linux host
   hosts: all
   tasks:
+    - name: create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0775
+      loop:
+        - /etc/ssl/public/
     - name: Disable rp_filter
       sysctl:
               name: net.ipv4.conf.all.rp_filter
